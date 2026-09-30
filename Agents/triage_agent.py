@@ -109,7 +109,9 @@ Priority rules:
 Always use temperature=0 logic: consistent, rule-based classification."""
 
 def triage_ticket(ticket_number, short_description, description):
-    """Run the triage agent on a single ticket."""
+    """Run the triage agent on a single ticket.
+    Returns the classify_ticket result dict (used by the C6/C7 orchestrator), or None."""
+    classification = None
     print(f"\n{'='*55}")
     print(f"Triaging: {ticket_number}")
     print(f"{'='*55}")
@@ -151,6 +153,7 @@ def triage_ticket(ticket_number, short_description, description):
                     result = handle_tool_call(block.name, block.input)
 
                     if block.name == "classify_ticket":
+                        classification = result
                         print(f"  → Category:    {result.get('category')}")
                         print(f"  → Priority:    {result.get('priority')}")
                         print(f"  → Assign To:   {result.get('assignment_group')}")
@@ -169,6 +172,8 @@ def triage_ticket(ticket_number, short_description, description):
         # max_tokens / refusal / anything else: stop instead of looping forever
         print(f"  ! Stopped with stop_reason={response.stop_reason}")
         break
+
+    return classification
 
 # ── RUN ON SAMPLE TICKETS ─────────────────────────────────────────────────────
 
